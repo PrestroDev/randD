@@ -49,3 +49,14 @@ foreach (var component in solutionComponents)
     string name = ((EntityReference)component.GetAttributeValue<AliasedValue>("customapi.name")).Name;
     Console.WriteLine($"Custom connector found: {name}");
 }
+
+// Retrieve the custom connectors from the solution using the IOrganizationService interface
+var solutionComponents = crmServiceClient.RetrieveMultiple(query).Entities;
+
+// Print the names of the custom connectors to the console
+foreach (var component in solutionComponents)
+{
+    var customApiName = ((AliasedValue)component.Attributes["customapi.name"]).Value as string;
+    Console.WriteLine($"Custom connector found: {customApiName}");
+}
+
