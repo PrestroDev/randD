@@ -1,0 +1,56 @@
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json;
+
+// Define the connection parameters
+string connectionString = "AuthType=OAuth; " +
+    "Username={username}; " +
+    "Password={password}; " +
+    "Url=https://org.crm.dynamics.com; " +
+    "AppId={clientId}; " +
+    "RedirectUri=app://unique-guid-here";
+
+// Define the name of the solution for which you want to retrieve the components
+string solutionName = "My Solution";
+
+// Create the HttpClient instance
+var httpClient = new HttpClient();
+httpClient.BaseAddress = new Uri(connectionString);
+
+// Add the required headers to the HttpClient
+httpClient.DefaultRequestHeaders.Accept.Clear();
+httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "{access_token}");
+
+// Create the method to retrieve the solution ID
+Guid GetSolutionId()
+{
+    // Create the query string to retrieve the solution ID
+    string solutionQueryString = $"/api/data/v9.2/solutions?$select=solutionid&$filter=friendlyname eq '{solutionName}' and ismanaged eq false";
+    var solutionResponse = httpClient.GetAsync(solutionQueryString).Result;
+    var solutionContent = solutionResponse.Content.ReadAsStringAsync().Result;
+    var solutionResult = JsonConvert.DeserializeObject<dynamic>(solutionContent);
+    return solutionResult.value[0].solutionid;
+}
+
+// Create the method to retrieve the solution components
+dynamic GetSolutionComponents(Guid solutionId)
+{
+    // Create the query string to retrieve the solution components
+    string solutionComponentsQueryString = $"/api/data/v9.2/solutioncomponents?$select=objectid&$filter=solutionid eq {solutionId} and componenttype eq 21"; // 21 represents Custom Connector component type
+    var solutionComponentsResponse = httpClient.GetAsync(solutionComponentsQueryString).Result;
+    var solutionComponentsContent = solutionComponentsResponse.Content.ReadAsStringAsync().Result;
+    return JsonConvert.DeserializeObject<dynamic>(solutionComponentsContent);
+}
+
+// Call the methods to retrieve the solution ID and the solution components
+Guid solutionId = GetSolutionId();
+dynamic solutionComponentsContent = GetSolutionComponents(solutionId);
+
+// Print the names of the solution components to the console
+foreach (var solutionComponent in solutionComponentsContent.value)
+{
+    var objectId = solutionComponent.objectid;
+    Console.WriteLine($"Solution component found: {objectId}");
+}
