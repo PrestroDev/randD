@@ -1,0 +1,28 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+
+// Define the JSON string
+string jsonString = "{\"value\":[{\"@odata.etag\":\"W/\\\"75191123\\\"\",\"openapidefinition\":\"{\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"abcd\\\",\\\"description\\\":\\\"Connector abcd integration\\\",\\\"version\\\":\\\"1.0\\\"},\\\"host\\\":\\\"@environmentVariables(\\\\\\\"cms_SAPENDEAVORHOST\\\\\\\")\"}]}";
+
+// Parse the JSON string into a JObject
+JObject jsonObject = JObject.Parse(jsonString);
+
+// Get the value array
+JArray valueArray = (JArray)jsonObject["value"];
+
+// Loop through the objects in the value array
+foreach (JObject item in valueArray)
+{
+    // Get the openapidefinition property as a string
+    string openApiDefinitionString = (string)item["openapidefinition"];
+
+    // Parse the openapidefinition JSON string into a JObject
+    JObject openApiDefinitionObject = JObject.Parse(openApiDefinitionString);
+
+    // Get the host property value as a string
+    string hostValue = (string)openApiDefinitionObject["host"];
+
+    // Do something with the host value
+    Console.WriteLine(hostValue);
+}
