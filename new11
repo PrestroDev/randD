@@ -1,0 +1,37 @@
+using System.Data;
+using System.IO;
+
+// Define the DataTable
+DataTable dataTable = new DataTable("MyDataTable");
+dataTable.Columns.Add("Column1", typeof(string));
+dataTable.Columns.Add("Column2", typeof(int));
+dataTable.Rows.Add("Value1", 1);
+dataTable.Rows.Add("Value2", 2);
+dataTable.Rows.Add("Value3", 3);
+
+// Define the file path
+string filePath = @"C:\MyFile.csv";
+
+// Create the StreamWriter object
+using (StreamWriter streamWriter = new StreamWriter(filePath))
+{
+    // Write the header row
+    foreach (DataColumn column in dataTable.Columns)
+    {
+        streamWriter.Write($"\"{column.ColumnName}\",");
+    }
+    streamWriter.WriteLine();
+
+    // Write the data rows
+    foreach (DataRow row in dataTable.Rows)
+    {
+        foreach (var item in row.ItemArray)
+        {
+            streamWriter.Write($"\"{item}\",");
+        }
+        streamWriter.WriteLine();
+    }
+}
+
+// Print a message to the console
+Console.WriteLine($"The DataTable has been exported to {filePath}");
